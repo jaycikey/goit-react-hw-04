@@ -1,0 +1,25 @@
+.card {
+  background-color: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease-in-out;
+  display: flex;
+  flex-direction: column;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+.cardImage {
+  flex: 1;
+  width: 100%;
+  max-height: 220px;
+  object-fit: cover;
+}
+
+.cardInfo {
+  padding: 12px;
+  color: #666;
+}
