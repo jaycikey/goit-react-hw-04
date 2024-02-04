@@ -32,6 +32,7 @@ export const App = () => {
         nextPage,
         10
       );
+
       setImages(prevImages => {
         return nextPage === 1 ? [...results] : [...prevImages, ...results];
       });
@@ -41,7 +42,8 @@ export const App = () => {
       if (nextPage === total_pages) {
         setIsLoadMoreBtn(false);
       } else {
-        setPage(nextPage);
+        setPage(prevPage => prevPage + 1);
+        setIsLoadMoreBtn(true);
       }
     } catch (error) {
       setError('Failed to fetch images: ' + error.message);
@@ -70,10 +72,10 @@ export const App = () => {
   };
 
   const handleLoadMore = () => {
-    if (page === totalPages) {
-      setIsLoadMoreBtn(false);
-    } else {
+    if (page < totalPages) {
       fetchImages(query, page + 1);
+    } else {
+      setIsLoadMoreBtn(false);
     }
   };
 
