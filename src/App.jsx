@@ -39,7 +39,7 @@ export const App = () => {
     }
   };
 
-  const handleSubmit = event => {
+  const handleSubmit = async event => {
     event.preventDefault();
     const formQuery = event.target.elements.query.value.trim();
     if (formQuery === '') {
@@ -48,9 +48,13 @@ export const App = () => {
       setQuery(formQuery);
       setImages([]);
       setPage(1);
-      fetchImages(formQuery, 1);
-      setModalOpen(false);
-      setLastQuery(formQuery);
+      try {
+        await fetchImages(formQuery, 1);
+        setModalOpen(false);
+        setLastQuery(formQuery);
+      } catch (error) {
+        setError('Failed to fetch images: ' + error.message);
+      }
     }
   };
 

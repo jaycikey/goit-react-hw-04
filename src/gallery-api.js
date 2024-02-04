@@ -11,10 +11,14 @@ export async function fetchImagesWithName(query, page = 1, perPage = 10) {
     client_id: ACCESS_KEY,
   };
 
-  try {
-    const response = await axios.get(url, { params });
-    return response.data.results;
-  } catch (error) {
-    return error;
+  const response = await axios.get(url, { params });
+
+  if (response.status !== 200) {
+    throw new Error(`Failed to fetch images: Status ${response.status}`);
   }
+
+  if (response.data.results.length === 0) {
+    throw new Error(`No results found for "${query}".`);
+  }
+  return response.data.results;
 }
