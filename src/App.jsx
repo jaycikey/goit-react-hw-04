@@ -16,6 +16,7 @@ export const App = () => {
   const [images, setImages] = useState([]);
   const [error, setError] = useState(null);
   const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [lastQuery, setLastQuery] = useState('');
@@ -26,12 +27,22 @@ export const App = () => {
       setIsLoadMoreBtn(false);
       setError(null);
 
-      const data = await fetchImagesWithName(query, nextPage, 10);
+      const { results, total_pages } = await fetchImagesWithName(
+        query,
+        nextPage,
+        10
+      );
       setImages(prevImages => {
-        return nextPage === 1 ? [...data] : [...prevImages, ...data];
+        return nextPage === 1 ? [...results] : [...prevImages, ...results];
       });
-      setIsLoadMoreBtn(data.length > 0);
-      setPage(nextPage);
+
+      setTotalPages(total_pages);
+
+      if (nextPage === total_pages) {
+        setIsLoadMoreBtn(false);
+      } else {
+        setPage(nextPage);
+      }
     } catch (error) {
       setError('Failed to fetch images: ' + error.message);
     } finally {
@@ -59,7 +70,11 @@ export const App = () => {
   };
 
   const handleLoadMore = () => {
-    fetchImages(query, page + 1);
+    if (page === totalPages) {
+      setIsLoadMoreBtn(false);
+    } else {
+      fetchImages(query, page + 1);
+    }
   };
 
   const handleImageClick = image => {

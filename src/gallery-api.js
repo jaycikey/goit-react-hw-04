@@ -17,8 +17,11 @@ export async function fetchImagesWithName(query, page = 1, perPage = 10) {
     throw new Error(`Failed to fetch images: Status ${response.status}`);
   }
 
+  const { results, total_pages } = response.data;
+
   if (response.data.results.length === 0) {
     throw new Error(`No results found for "${query}".`);
   }
-  return response.data.results;
+
+  return { results, total_pages };
 }
