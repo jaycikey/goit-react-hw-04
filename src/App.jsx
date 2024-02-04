@@ -18,6 +18,7 @@ export const App = () => {
   const [page, setPage] = useState(1);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [lastQuery, setLastQuery] = useState('');
 
   const fetchImages = async (query, nextPage = page) => {
     try {
@@ -43,12 +44,13 @@ export const App = () => {
     const formQuery = event.target.elements.query.value.trim();
     if (formQuery === '') {
       toast.error('Please enter a text to search for images.');
-    } else {
+    } else if (formQuery !== lastQuery) {
       setQuery(formQuery);
       setImages([]);
       setPage(1);
       fetchImages(formQuery, 1);
       setModalOpen(false);
+      setLastQuery(formQuery);
     }
   };
 
