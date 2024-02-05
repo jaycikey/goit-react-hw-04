@@ -5,7 +5,7 @@ import { ImageGallery } from './components/ImageGallery/ImageGallery';
 import { ImageModal } from './components/ImageModal/ImageModal';
 import { Loader } from './components/Loader/Loader';
 import { SearchBar } from './components/SearchBar/SearchBar';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { LoadMoreBtn } from './components/LoadMoreBtn/LoadMoreBtn';
 import styles from './App.module.css';
 
@@ -19,84 +19,65 @@ export const App = () => {
   const [totalPages, setTotalPages] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
-  const [lastQuery, setLastQuery] = useState('');
 
-  const fetchImages = async (query, nextPage = page) => {
-    try {
+  useEffect(() => {
+    if (!query) return;
+    const fetchImages = async () => {
       setIsLoading(true);
-      setIsLoadMoreBtn(false);
-      setError(null);
-
-      const { results, total_pages } = await fetchImagesWithName(
-        query,
-        nextPage,
-        10
-      );
-
-      setImages(prevImages => {
-        return nextPage === 1 ? [...results] : [...prevImages, ...results];
-      });
-
-      setTotalPages(total_pages);
-
-      if (nextPage === total_pages) {
-        setIsLoadMoreBtn(false);
-      } else {
-        setPage(prevPage => prevPage + 1);
-        setIsLoadMoreBtn(true);
-      }
-    } catch (error) {
-      setError('Failed to fetch images: ' + error.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleSubmit = async event => {
-    event.preventDefault();
-    const formQuery = event.target.elements.query.value.trim();
-    if (formQuery === '') {
-      toast.error('Please enter a text to search for images.');
-    } else if (formQuery !== lastQuery) {
-      setQuery(formQuery);
-      setImages([]);
-      setPage(1);
       try {
-        await fetchImages(formQuery, 1);
-        setModalOpen(false);
-        setLastQuery(formQuery);
+        const { results, total_pages } = await fetchImagesWithName(
+          query,
+          page,
+          10
+        );
+        setTotalPages(total_pages);
+        setIsLoadMoreBtn(page < total_pages);
+        setImages(prev => (page === 1 ? results : [...prev, ...results]));
+        setError(null);
       } catch (error) {
         setError('Failed to fetch images: ' + error.message);
+        setImages([]);
+        setIsLoadMoreBtn(false);
+      } finally {
+        setIsLoading(false);
       }
+    };
+    fetchImages();
+  }, [query, page]);
+
+  const handleSubmit = searchQuery => {
+    if (searchQuery.trim() === '') {
+      toast.error('Please enter a text to search for images.');
+      return;
+    }
+    setError(null);
+    if (searchQuery !== query) {
+      setQuery(searchQuery);
+      setImages([]);
+      setPage(1);
     }
   };
 
   const handleLoadMore = () => {
     if (page < totalPages) {
-      fetchImages(query, page + 1);
-    } else {
-      setIsLoadMoreBtn(false);
+      setPage(prevPage => prevPage + 1);
     }
   };
 
   const handleImageClick = image => {
-    if (!modalOpen) {
-      setSelectedImage(image);
-      setModalOpen(true);
-    }
+    setSelectedImage(image);
+    setModalOpen(true);
   };
 
   const closeModal = () => {
-    if (modalOpen) {
-      setModalOpen(false);
-      setSelectedImage(null);
-    }
+    setModalOpen(false);
+    setSelectedImage(null);
   };
 
   return (
     <div>
       <Toaster position="top-center" reverseOrder={false} />
-      <SearchBar value={query} onChange={setQuery} onSubmit={handleSubmit} />
+      <SearchBar onSubmit={handleSubmit} />
 
       {error ? (
         <ErrorMsg message={error} />

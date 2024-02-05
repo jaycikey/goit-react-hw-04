@@ -8,6 +8,16 @@ Modal.setAppElement('#root');
 export const ImageModal = ({ isOpen, onRequestClose, imageSrc }) => {
   const [isImageLoaded, setIsImageLoaded] = useState(false);
 
+  const handleOverlayClick = e => {
+    if (e.target === e.currentTarget) {
+      onRequestClose();
+    }
+  };
+
+  const handleImageLoaded = () => {
+    setIsImageLoaded(true);
+  };
+
   return (
     <Modal
       isOpen={isOpen}
@@ -24,17 +34,18 @@ export const ImageModal = ({ isOpen, onRequestClose, imageSrc }) => {
         },
         overlay: {
           backgroundColor: 'rgba(0, 0, 0, 0.75)',
+          zIndex: 1000,
         },
       }}
     >
-      <div className={styles.modalOverlay} onClick={onRequestClose}>
+      <div className={styles.modalOverlay} onClick={handleOverlayClick}>
         {!isImageLoaded && <Loader />}
         <img
           src={imageSrc}
           alt="Expanded view"
           className={styles.modalContent}
-          onLoad={() => setIsImageLoaded(true)}
-          onError={() => onRequestClose()}
+          onLoad={handleImageLoaded}
+          onError={onRequestClose}
           style={{ display: isImageLoaded ? 'block' : 'none' }}
         />
       </div>
